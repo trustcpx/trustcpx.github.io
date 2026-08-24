@@ -1,0 +1,136 @@
+---
+title: "TrustCPX: A Decentralized Trust Framework for Cooperative Perception in Connected Vehicles"
+theme: light
+favicon: favicon.svg
+description: "Anonymous ICRA submission: decentralized trust for robust cooperative perception in connected vehicles."
+thumbnail: screenshot-light.png
+---
+
+import Header from "./components/Header.astro";
+import Video from "./components/Video.astro";
+import HighlightedSection from "./components/HighlightedSection.astro";
+import Figure from "./components/Figure.astro";
+import Picture from "./components/Picture.astro";
+import TwoColumns from "./components/TwoColumns.astro";
+import Wide from "./components/Wide.astro";
+import { Comparison } from "./components/Comparison.tsx";
+
+import headerWallpaper from "./assets/trustcpx-header.jpg";
+import localTrustVideo from "./assets/local_trust_estimation_using_BEVFusion_detections.mp4";
+import groundTruthVideo from "./assets/local_trust_ground_truth.mp4";
+import localTrust from "./assets/slider_v2xreal_dataset_of_ucla_local_trustworthiness_visualization_results.png";
+import groundTruth from "./assets/slider_v2xreal_dataset_of_ucla_visualized_ground_truth.png";
+import bevIntersection from "./assets/visualization_results_BEV_UCLA_Smart_Intersection.png";
+import globalFusion from "./assets/visualization_results_global_fusion.png";
+import globalTrust from "./assets/Visualization_results_of_global_trust_estimation.png";
+
+<Header
+  title="TrustCPX: A Decentralized Trust Framework for Cooperative Perception in Connected Vehicles"
+  authors={[]}
+  conference="Anonymous submission to ICRA"
+  links={[
+    { name: "Paper", url: "#paper", icon: "ri:file-pdf-2-line" },
+    { name: "Code", url: "#code", icon: "ri:github-line" },
+    { name: "arXiv", url: "#arxiv", icon: "academicons:arxiv" },
+    { name: "Slides", url: "#slides", icon: "ri:slideshow-2-line" },
+    { name: "Poster", url: "#poster", icon: "ri:layout-grid-line" },
+  ]}
+>
+  <Picture slot="background" src={headerWallpaper} alt="Autonomous vehicle equipped with a roof-mounted perception sensor" priority />
+</Header>
+
+<HighlightedSection>
+### Abstract
+
+Cooperative perception (CP) approaches to autonomous driving position themselves as a natural successor to single-vehicle solutions that often suffer from occlusion, a common precursor to collisions and a particular problem at intersections. However, the incorporation of external sensor data (from other vehicles, roadside units) hinges upon trust – if the ego vehicle cannot deduce which data is truthful, timely, and accurate, it leaves itself vulnerable to faulty or adversarial agents. Existing CP approaches largely focus on tackling one or two facets of trust in isolation (such as on-off attacks, Sybil attacks, or data spoofing), and, to our knowledge, no end-to-end pipeline exists to address the full range of threats. We adapt and extend reputation methods from prior work to build such a pipeline and test it on real-world datasets. Each vehicle maintains a local estimate of every peer, updated every iteration based on message freshness, reputation volatility, and accumulated agreement with independently observed evidence. Furthermore, accumulated agreement itself is reputation-weighted, so low-standing senders cannot vouch for one another. The final fusion is gated upon reputation, so only trustworthy objects are passed for downstream tasks such as trajectory planning. Evaluated on real-world data recorded at a smart intersection, the pipeline holds per-frame latency under the 50 ms real-time budget on the target edge device, and has been demonstrated to industry and transportation partners, with live field deployment planned next.
+
+</HighlightedSection>
+
+## Overview
+
+Connected vehicles can extend their field of view through cooperative perception, but shared detections are useful only when the receiver can assess their provenance and reliability. TrustCPX is a decentralized, vehicle-local trust layer that evaluates every peer before its objects enter fusion. It is designed for the heterogeneous, delayed, and potentially adversarial messages encountered by real V2X systems [@chen2019cooper; @v2xreal2023].
+
+For each received message, TrustCPX combines freshness, reputation volatility, and agreement with independently observed evidence. Agreement is itself reputation-weighted, limiting collusion by low-standing peers. The resulting local reputation gates fusion, preserving actionable detections while excluding sources that cannot be trusted.
+
+## Local Trust Estimation
+
+Hover, drag, or tap the divider to reveal the difference between the TrustCPX local-trust visualization and the annotated ground truth.
+
+<Wide>
+  <Comparison client:idle>
+    <Picture slot="itemOne" src={localTrust} alt="TrustCPX local trustworthiness visualization at a real intersection" />
+    <Picture slot="itemTwo" src={groundTruth} alt="Ground-truth visualization of the V2X-Real dataset" />
+  </Comparison>
+</Wide>
+
+<Figure>
+  <Picture slot="figure" src={bevIntersection} alt="Bird's-eye-view visualization of cooperative perception and global trust estimation" />
+  <Fragment slot="caption">TrustCPX evaluates received cooperative detections in a challenging intersection scene before they are admitted to the ego vehicle's perception stack.</Fragment>
+</Figure>
+
+## Trust-aware fusion
+
+The pipeline is lightweight enough to run online: messages are scored at every iteration, peer estimates are updated locally, and fusion is conditioned on reputation. This retains the benefits of multi-agent perception while reducing the effect of stale, inconsistent, or malicious reports. Our evaluation uses real-world cooperative driving data from a smart intersection, represented in the V2X-Real dataset [@v2xreal2023], and BEV detections produced with a multimodal fusion backbone [@liu2022bevfusion].
+
+<TwoColumns>
+  <div slot="left">
+    <Video src={localTrustVideo} aria-label="Local trust estimation with BEVFusion detections" />
+    <p class="text-center text-sm">Local trust estimation over BEV detections.</p>
+  </div>
+  <div slot="right">
+    <Video src={groundTruthVideo} aria-label="Ground-truth cooperative perception sequence" />
+    <p class="text-center text-sm">Corresponding ground-truth sequence.</p>
+  </div>
+</TwoColumns>
+
+<Figure>
+  <Picture slot="figure" src={globalFusion} alt="Trust-aware global fusion results across connected vehicles" />
+  <Fragment slot="caption">Trust-gated global fusion: only detections from sufficiently reputable peers contribute to the final cooperative scene representation.</Fragment>
+</Figure>
+
+<Figure>
+  <Picture slot="figure" src={globalTrust} alt="Global trust estimation results for connected perception agents" />
+  <Fragment slot="caption">Global trust estimation aggregates evidence without allowing low-reputation agents to reinforce one another.</Fragment>
+</Figure>
+
+## Experimental results
+
+The following table is reserved for the camera-ready quantitative comparison. It is intentionally kept as a clearly labeled placeholder while final baselines and attack configurations are being consolidated.
+
+| Method | Cooperative detection | Attack robustness | Latency (ms/frame) |
+| :--- | :---: | :---: | :---: |
+| Single-vehicle perception | TBD | TBD | TBD |
+| Cooperative fusion baseline | TBD | TBD | TBD |
+| **TrustCPX (ours)** | TBD | TBD | **< 50** |
+
+## Resources
+
+Anonymous double-blind review materials will be linked here when permitted.
+
+| Resource | Status |
+| :--- | :--- |
+| <span id="paper">Paper</span> | Placeholder for anonymous manuscript |
+| <span id="code">Code</span> | Placeholder for anonymous repository |
+| <span id="arxiv">arXiv</span> | Placeholder pending public release |
+| <span id="slides">Slides</span> | Placeholder for presentation deck |
+| <span id="poster">Poster</span> | Placeholder for conference poster |
+
+## References
+
+TrustCPX builds on cooperative perception, real-world V2X benchmarks, and reputation reasoning for distributed systems [@chen2019cooper; @v2xreal2023; @josang2007survey].
+
+## BibTeX
+
+```bibtex
+@inproceedings{trustcpx2026,
+  title     = {TrustCPX: A Decentralized Trust Framework for Cooperative Perception in Connected Vehicles},
+  author    = {Anonymous},
+  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
+  year      = {2026},
+  note      = {Under double-blind review}
+}
+```
+
+## Bibliography
+
+[^ref]
