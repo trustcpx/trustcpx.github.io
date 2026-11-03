@@ -2,6 +2,7 @@
 import { Font } from "astro:assets";
 
 import Table from "../components/Table.astro";
+import PageMotion from "../components/PageMotion.astro";
 
 import "../styles/global.css";
 import "katex/dist/katex-swap.css";
@@ -56,6 +57,7 @@ const prefix = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     <main>
       <Content components={{ table: Table }} />
     </main>
+    <PageMotion />
     <footer class="mx-auto max-w-[50rem] px-6 text-center">
       <p class="prose-sm text-center">
         Built with <a

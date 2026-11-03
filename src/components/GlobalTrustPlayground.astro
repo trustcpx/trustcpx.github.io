@@ -1,0 +1,173 @@
+---
+import GateFormulaReference from "./GateFormulaReference.astro";
+const fields = [
+  ["rep", "Stored reputation R", 0, 1, .01, .8, "Receiver's saved trust in this sender. Illustrative input, not a paper constant.", "common"],
+  ["threshold", "Gate threshold R*", .1, 1, .01, .6, "Minimum effective reputation for admission. Paper: 0.6.", "common"],
+  ["speed", "Sender speed (m/s)", 0, 40, 1, 15, "Illustrative sender speed; blind distance = speed × latency.", "freshness"],
+  ["latency", "Message latency (ms)", 0, 1000, 5, 20, "Illustrative send-to-receive delay.", "freshness"],
+  ["grace", "Grace distance G (m)", 0, 5, .1, 1, "Blind travel allowed before decay. Paper: 1 m.", "freshness"],
+  ["base", "Decay base ρ", .1, .95, .05, .5, "Freshness is multiplied by this value every D metres beyond grace. Paper: 0.5.", "freshness"],
+  ["distance", "Decay distance D (m)", .5, 15, .5, 5, "Distance per decay step. Paper: 5 m.", "freshness"],
+  ["fFloor", "Freshness floor", 0, 1, .05, .5, "Minimum freshness multiplier. Paper: 0.5.", "freshness"],
+  ["time", "Inspect time (s)", 0, 60, 1, 30, "Inspect a synthetic 30 Hz trace: drops every second for 30 s, then recovery.", "volatility"],
+  ["drop", "Drop magnitude", 0, .2, .005, .05, "Synthetic downward step followed by a rebound; demonstrates history sensitivity.", "volatility"],
+  ["half", "Persistence half-life (s)", 1, 180, 1, 60, "How long persistence memory takes to halve. Paper: 60 s.", "volatility"],
+  ["weightL", "Persistence weight λL", 0, 5, .1, 2, "Strength of long-term drop memory. Paper: 2.0.", "volatility"],
+  ["weightR", "Recent weight λr", 0, 1, .01, .15, "Strength of recent drop severity. Paper: 0.15.", "volatility"],
+  ["vFloor", "Volatility floor", 0, 1, .05, .4, "Minimum volatility multiplier. Paper: 0.4.", "volatility"],
+  ["range", "Normalization range", .02, .5, .01, .1, "Drop normalization scale. Paper: 0.10.", "advanced"],
+  ["dead", "Normalized dead zone z", 0, .2, .01, .02, "Ignores tiny normalized drops. Paper: 0.02.", "advanced"],
+  ["alpha", "Drop shape α", .4, 2, .1, 1, "Shapes severity and combines the risk channels. Paper: 1.", "advanced"],
+  ["window", "Recent window K", 1, 30, 1, 6, "Number of frames in the recent channel. Paper: 6.", "advanced"],
+  ["beta", "Recent forgetting βr", .1, .99, .01, .8, "Weight retained for each older recent frame. Paper: 0.80.", "advanced"],
+  ["gap", "Absence (days)", 0, 30, 1, 10, "Illustrative time since the sender was last seen.", "absence"],
+  ["gapGrace", "Absence grace (days)", 0, 10, 1, 3, "No reseeding before this gap. Paper: 3 days.", "absence"],
+  ["tau", "Decay time constant (days)", 1, 20, .1, 6.7, "Controls return toward baseline after grace. Paper: 6.7 days.", "absence"],
+  ["baseline", "Neutral baseline R₀", 0, 1, .05, .5, "Only stored reputation above this baseline decays. Paper: 0.5.", "absence"],
+];
+---
+<section class="gate-lab" aria-label="Interactive global trust model">
+  <div class="lab-toolbar">
+    <div role="group" aria-label="Choose a factor">
+      <button type="button" data-mode="freshness" aria-pressed="true">1. Freshness</button>
+      <button type="button" data-mode="volatility" aria-pressed="false">2. Volatility</button>
+      <button type="button" data-mode="absence" aria-pressed="false">3. Absence</button>
+    </div>
+    <button type="button" data-reset>Reset paper constants</button>
+  </div>
+  <div class="lab-workspace">
+    <div class="lab-controls">
+      <p class="lab-help">Hover, focus, or tap a parameter name for its meaning. Sender conditions are illustrative; model constants start at paper values.</p>
+      {fields.map(([key, label, min, max, step, value, help, group]) => (
+        <div class="lab-field" data-group={group} hidden={group !== "common" && group !== "freshness"}>
+          <span><span class="lab-tooltip">
+            <button type="button" class="lab-help-trigger" id={`label-${key}`} aria-describedby={`help-${key}`}>{label} <span aria-hidden="true">ⓘ</span></button>
+            <span role="tooltip" class="lab-help-popup" id={`help-${key}`}>{help}</span>
+          </span><output data-out={key}>{value}</output></span>
+          <input type="range" aria-labelledby={`label-${key}`} data-key={key} min={min} max={max} step={step} value={value} />
+        </div>
+      ))}
+    </div>
+    <div class="lab-visual">
+      <h2 data-title>1. How stale is too stale?</h2>
+      <p data-description></p>
+      <div class="lab-intuition" data-formula-mode="freshness">
+        <p><strong>Think of an old position report.</strong> The longer it spends in transit, the farther a moving sender could have travelled. Freshness measures that possible travel, rather than delay alone.</p>
+        <p><strong>Try it:</strong> increase message latency, then set speed to zero. At zero speed, blind travel distance is zero and freshness stays at 1. A larger grace distance postpones decay; a larger decay distance makes it gentler.</p>
+      </div>
+      <div class="lab-intuition" data-formula-mode="volatility" hidden>
+        <p><strong>Think of a sender that repeatedly loses trust, then rebounds.</strong> Its latest reputation can look healthy while its recent behavior remains unstable. Volatility remembers those drops and makes admission more cautious.</p>
+        <p><strong>Try it:</strong> increase the persistence weight or half-life. Then move the inspection time past 30 seconds, when the synthetic drops stop. A longer half-life keeps the penalty around longer; a larger recent weight strengthens the brief dips.</p>
+      </div>
+      <div class="lab-intuition" data-formula-mode="absence" hidden>
+        <p><strong>Think of a trusted sender returning after weeks offline.</strong> Its old reputation may no longer describe its current hardware or software. After a grace period, reputation above the neutral baseline moves back toward that baseline.</p>
+        <p><strong>Try it:</strong> increase the absence gap, then set stored reputation below baseline. Distrusted senders retain that lower score: going silent does not restore trust. A larger time constant makes trusted reputation decay more slowly.</p>
+      </div>
+      <div class="lab-legend"><span>━━ Your parameters</span><span>┄┄ Paper constants</span><span>┄┄ Admission threshold</span></div>
+      <svg viewBox="0 0 640 300" role="img" aria-label="Parameter-dependent trust score compared with paper constants and the admission threshold">
+        <rect x="50" y="25" width="570" height="220" fill="var(--muted)" />
+        <path d="M50 25H620 M50 135H620 M50 245H620" stroke="var(--border)" fill="none" />
+        <path data-default fill="none" stroke="#71717a" stroke-width="2" stroke-dasharray="5 5" />
+        <path data-threshold fill="none" stroke="var(--secondary)" stroke-dasharray="6 4" stroke-width="2" />
+        <path data-line fill="none" stroke="var(--primary)" stroke-width="3" />
+        <circle data-point r="6" fill="var(--primary)" stroke="white" stroke-width="2" />
+        <g fill="currentColor" font-size="12"><text x="40" y="30" text-anchor="end">1.0</text><text x="40" y="140" text-anchor="end">0.5</text><text x="40" y="250" text-anchor="end">0</text><text x="50" y="267" data-min>0 ms</text><text x="620" y="267" text-anchor="end" data-max>1,000 ms</text><text x="335" y="292" text-anchor="middle" data-axis>Message latency</text></g>
+      </svg>
+      <div class="lab-outcome" aria-live="polite"><strong data-equation></strong><span data-verdict></span><p data-insight></p></div>
+      <details class="lab-formulas">
+        <summary>Formula, paper defaults, and every variable</summary>
+        <GateFormulaReference />
+      </details>
+    </div>
+  </div>
+  <p class="lab-footnote">Freshness and volatility affect admission only. Absence reseeds stored reputation. The volatility trace illustrates the paper's drop-memory equations; it does not reproduce the full attack experiment or verdict ledger.</p>
+</section>
+<script>
+  // @ts-nocheck
+  const lab = document.querySelector('.gate-lab');
+  if (lab) {
+    lab.querySelectorAll('.lab-help-trigger').forEach(button => {
+      button.addEventListener('click', () => {
+        const parent = button.closest('.lab-tooltip');
+        const open = !parent.classList.contains('is-open');
+        lab.querySelectorAll('.lab-tooltip').forEach(el => el.classList.remove('is-open'));
+        parent.classList.toggle('is-open', open);
+      });
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('.lab-tooltip')) lab.querySelectorAll('.lab-tooltip').forEach(el => el.classList.remove('is-open'));
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        lab.querySelectorAll('.lab-tooltip').forEach(el => el.classList.remove('is-open'));
+        if (document.activeElement?.matches('.lab-help-trigger')) document.activeElement.blur();
+      }
+    });
+    const inputs = [...lab.querySelectorAll('[data-key]')];
+    const initial = Object.fromEntries(inputs.map(i => [i.dataset.key, Number(i.value)]));
+    const state = {...initial};
+    let mode = 'freshness';
+    const clip = (x, lo=0, hi=1) => Math.max(lo, Math.min(hi,x));
+    const fresh = (ms,p) => Math.max(p.fFloor, Math.pow(p.base, Math.max(0,p.speed*ms/1000-p.grace)/p.distance));
+    const seed = (day,p) => p.rep > p.baseline && day > p.gapGrace ? p.baseline+(p.rep-p.baseline)*Math.exp(-(day-p.gapGrace)/p.tau) : p.rep;
+    function trace(p) {
+      const result=[]; const recent=[]; let memory=0; const betaL=Math.pow(2,-1/(30*p.half));
+      for(let i=0;i<=1800;i++){
+        const down = i>0 && i<900 && i%30===0 ? p.drop : 0;
+        const severity=Math.pow(clip(down/p.range-p.dead),p.alpha);
+        memory=betaL*memory+(1-betaL)*severity;
+        recent.unshift(severity); recent.length=Math.min(recent.length,p.window);
+        let sum=0, weight=0;
+        for(let k=0;k<p.window;k++){sum+=(recent[k]||0)*Math.pow(p.beta,k);weight+=Math.pow(p.beta,k);}
+        const v=clip(1-p.weightR*Math.pow(sum/weight,1/p.alpha)-p.weightL*Math.pow(memory,1/p.alpha),p.vFloor,1);
+        result.push(v);
+      } return result;
+    }
+    const x = (value,max) => 50+570*value/max;
+    const y = value => 245-220*clip(value);
+    const path = (values,max) => values.map(([t,v],i)=>(i?'L':'M')+x(t,max).toFixed(2)+' '+y(v).toFixed(2)).join(' ');
+    function update(){
+      inputs.forEach(i=>{state[i.dataset.key]=Number(i.value); lab.querySelector('[data-out="'+i.dataset.key+'"]').textContent=Number(i.value).toFixed(Number(i.step)<1?2:0);});
+      let points, ref, value, at, max, f=1,v=1,r=state.rep;
+      const paper={...state,grace:1,base:.5,distance:5,fFloor:.5,half:60,weightL:2,weightR:.15,vFloor:.4,range:.1,dead:.02,alpha:1,window:6,beta:.8,gapGrace:3,tau:6.7,baseline:.5};
+      if(mode==='freshness'){
+        max=1000;at=state.latency;f=fresh(at,state);
+        points=Array.from({length:101},(_,i)=>[i*10,r*fresh(i*10,state)]);
+        ref=Array.from({length:101},(_,i)=>[i*10,r*fresh(i*10,paper)]);
+      } else if(mode==='absence'){
+        max=30;at=state.gap;r=seed(at,state);
+        points=Array.from({length:101},(_,i)=>[i*.3,seed(i*.3,state)]);
+        ref=Array.from({length:101},(_,i)=>[i*.3,seed(i*.3,paper)]);
+      } else {
+        max=60;at=state.time;const current=trace(state),base=trace(paper);v=current[Math.round(at*30)];
+        points=current.map((v,i)=>[i/30,r*v]);ref=base.map((v,i)=>[i/30,r*v]);
+      }
+      value=r*f*v;
+      lab.querySelector('[data-line]').setAttribute('d',path(points,max));
+      lab.querySelector('[data-default]').setAttribute('d',path(ref,max));
+      lab.querySelector('[data-threshold]').setAttribute('d','M50 '+y(state.threshold)+'H620');
+      lab.querySelector('[data-point]').setAttribute('cx',x(at,max));lab.querySelector('[data-point]').setAttribute('cy',y(value));
+      const descriptions={
+        freshness:['1. How stale is too stale?','The dot represents this message. The blue curve shows how its admission score changes across latency; the gray curve uses paper constants.','0 ms','1,000 ms','Message latency (ms)'],
+        absence:['3. What happens when a trusted sender returns?','The dot marks the selected absence gap. The curves show reputation on return; freshness and volatility are held at 1.','0 days','30 days','Absence gap (days)'],
+        volatility:['2. How long do repeated drops affect the gate?','Synthetic drops occur once per second for 30 s, followed by 30 s without drops. Rebounds keep raw reputation fixed so the curve isolates volatility memory.','0 s','60 s','Time (s) · drops stop at 30 s']
+      }[mode];
+      ['title','description','min','max','axis'].forEach((key,i)=>lab.querySelector('[data-'+key+']').textContent=descriptions[i]);
+      lab.querySelector('[data-equation]').textContent=r.toFixed(2)+' R × '+f.toFixed(2)+' F × '+v.toFixed(2)+' V = '+value.toFixed(2);
+      const pass=value>=state.threshold;
+      lab.querySelector('[data-verdict]').textContent=pass?'Admitted':'Gated out';
+      lab.querySelector('[data-verdict]').style.color=pass?'var(--success-foreground)':'var(--error)';
+      lab.querySelector('[data-insight]').textContent='Score '+value.toFixed(3)+(pass?' ≥ ':' < ')+state.threshold.toFixed(2)+' threshold. '+(pass?'Reports may be considered for fusion.':'Output is blocked; judging still continues.');
+    }
+    lab.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{
+      mode=button.dataset.mode;
+      lab.querySelectorAll('[data-formula-mode]').forEach(panel => panel.hidden = panel.dataset.formulaMode !== mode);
+      lab.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+      lab.querySelectorAll('[data-group]').forEach(el=>el.hidden=!(el.dataset.group==='common'||el.dataset.group===mode||(mode==='volatility'&&el.dataset.group==='advanced')));
+      update();
+    }));
+    inputs.forEach(i=>i.addEventListener('input',update));
+    lab.querySelector('[data-reset]').addEventListener('click',()=>{inputs.forEach(i=>i.value=initial[i.dataset.key]);update();});
+    update();
+  }
+</script>

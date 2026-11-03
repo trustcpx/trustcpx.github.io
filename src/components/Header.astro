@@ -34,8 +34,8 @@ const hasBackground = Astro.slots.has("background");
 
 <header
   class:list={[
-    "full-bleed relative mb-12 border-y-2 border-black",
-    hasBackground && "-mt-16 pt-24 pb-28",
+    "paper-hero full-bleed relative mb-0",
+    hasBackground && "-mt-16 py-16",
   ]}
 >
   {
@@ -52,12 +52,12 @@ const hasBackground = Astro.slots.has("background");
     class:list={[
       "relative z-10 mx-auto flex max-w-[50rem] flex-col items-center px-6 text-center",
       hasBackground
-        ? "gap-10 text-white prose-headings:text-white [text-shadow:0_0_8px_rgba(0,0,0,0.6)]"
+        ? "gap-6 text-white prose-headings:text-white [text-shadow:0_0_8px_rgba(0,0,0,0.6)]"
         : "gap-6",
     ]}
   >
-    <h1 class="my-0 text-5xl font-medium">{title}</h1>
-    <div class="flex flex-row flex-wrap justify-center gap-x-8 gap-y-4">
+    <h1 class="my-0 text-6xl font-medium">{title}</h1>
+    {authors.length > 0 && <div class="flex flex-row flex-wrap justify-center gap-x-8 gap-y-4">
       {
         authors.map((author) => (
           <div class="flex flex-col items-center text-center">
@@ -80,8 +80,8 @@ const hasBackground = Astro.slots.has("background");
           </div>
         ))
       }
-    </div>
-    {conference && <div>{conference}</div>}
+    </div>}
+    {conference && <div class="hero-subtitle">{conference}</div>}
     {
       notes && (
         <div class="text-center text-sm">
@@ -117,6 +117,7 @@ const hasBackground = Astro.slots.has("background");
 </header>
 
 <style>
+  .hero-subtitle { max-width: 44rem; font-size: clamp(1.1rem, 2.5vw, 1.5rem); line-height: 1.5; }
   /* Make the slotted cover (Picture/Video, or a plain <img>/<video>) fill the
      header, overriding those components' figure styling. Scoped to `.cover`.
      Kept as scoped CSS because expressing it with Tailwind would require

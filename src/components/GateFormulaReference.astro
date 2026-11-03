@@ -1,0 +1,71 @@
+---
+import katex from "katex";
+import "katex/dist/katex.min.css";
+const formulas = [
+  {
+    mode: "freshness", title: "Freshness: latency becomes blind travel distance",
+    equations: [
+      String.raw`b = \hat v\,\Delta_{\mathrm{tx}},\qquad b_{\mathrm{eff}}=\max(0,b-G)`,
+      String.raw`F=\max\!\left(F_{\mathrm{floor}},\rho_d^{\,b_{\mathrm{eff}}/D_{\mathrm{th}}}\right)`,
+    ],
+    variables: [
+      ["b", "Blind travel distance in metres."], ["v̂", "Estimated sender speed in metres per second."],
+      ["Δtx", "Message latency in seconds; the slider's milliseconds are divided by 1,000."],
+      ["G", "Grace distance before decay starts (paper: 1 m)."], ["beff", "Blind distance remaining after grace."],
+      ["ρd", "Decay base (paper: 0.5)."], ["Dth", "Distance per decay step (paper: 5 m)."],
+      ["Ffloor", "Minimum freshness (paper: 0.5)."], ["F", "Freshness multiplier applied to the admission score."],
+    ],
+    note: "In this demo V = 1, so the graph shows R × F. A stationary sender has no blind travel distance and therefore F = 1.",
+  },
+  {
+    mode: "volatility", title: "Volatility: recent drops and persistent memory",
+    equations: [
+      String.raw`d^t=R^{t-1}-R^t,\qquad \delta^t=\operatorname{clip}(d^t/D_{\mathrm{range}}-z,0,1)`,
+      String.raw`\rho^t=\beta_L\rho^{t-1}+(1-\beta_L)(\delta^t)^\alpha`,
+      String.raw`r^t=\frac{\sum_{k=0}^{K-1}\beta_r^k(\delta^{t-k})^\alpha}{\sum_{k=0}^{K-1}\beta_r^k}`,
+      String.raw`V^t=\operatorname{clip}\!\left(1-\lambda_r(r^t)^{1/\alpha}-\lambda_L(\rho^t)^{1/\alpha},V_{\mathrm{floor}},1\right)`,
+      String.raw`\beta_L=2^{-1/(f\,T_{1/2})}`,
+    ],
+    variables: [
+      ["t, k", "Frame index and number of frames back in history."], ["Rᵗ, dᵗ", "Raw reputation and its downward change at frame t."],
+      ["δᵗ", "Normalized drop severity; gains and sufficiently small drops contribute zero."],
+      ["Drange, z", "Normalization range and dead zone (paper: 0.10 and 0.02)."],
+      ["α", "Severity exponent (paper: 1)."], ["ρᵗ", "Persistent drop memory, initially zero; distinct from freshness's decay base ρd."],
+      ["βL", "Per-frame retention derived from the persistence half-life."],
+      ["f, T½", "Demo rate (30 Hz) and persistence half-life (paper: 60 s)."],
+      ["rᵗ", "Weighted recent drop severity."], ["K, βr", "Recent window length and retention (paper: 6 frames and 0.80)."],
+      ["λr, λL", "Recent and persistence penalty weights (paper: 0.15 and 2.0)."],
+      ["Vfloor, Vᵗ", "Minimum multiplier (paper: 0.4) and current volatility multiplier."],
+      ["clip(x, a, b)", "Limits x to the interval from a to b."],
+    ],
+    note: "The synthetic trace isolates drop memory with rebounds; the graph shows R × V with F = 1. It is not a replay of the full verdict-ledger attack experiment.",
+  },
+  {
+    mode: "absence", title: "Absence: reseed reputation after a long gap",
+    equations: [
+      String.raw`R_{\mathrm{seed}}=\begin{cases}R_0+(R_{\mathrm{last}}-R_0)e^{-(g-G_{\mathrm{gap}})/\tau_{\mathrm{gap}}},&g>G_{\mathrm{gap}}\ \text{and}\ R_{\mathrm{last}}>R_0\\R_{\mathrm{last}},&\text{otherwise}\end{cases}`,
+    ],
+    variables: [
+      ["Rlast", "Sender's stored reputation before the absence (the R slider)."],
+      ["Rseed", "Reputation used when the sender returns."], ["R₀", "Neutral baseline (paper: 0.5)."],
+      ["g", "Absence duration in days."], ["Ggap", "Absence grace period (paper: 3 days)."],
+      ["τgap", "Exponential decay time constant (paper: 6.7 days)."], ["e", "Base of the natural exponential function."],
+    ],
+    note: "This is a one-time reseeding step, not message freshness decay. Only reputation above baseline decays. The graph uses F = V = 1, so the admission score equals Rseed.",
+  },
+];
+const render = (equation: string) => katex.renderToString(equation, { displayMode: true, throwOnError: true });
+---
+<section class="formula-reference" aria-label="Formula and variable definitions">
+  <p class="formula-gate" set:html={render(String.raw`R_{\mathrm{eff}}=R\,F\,V,\qquad \text{admit if } R_{\mathrm{eff}}\geq R^*`)} />
+  <p class="formula-gate-key">R = stored or reseeded reputation · F = freshness · V = volatility · R* = admission threshold (paper: 0.6).</p>
+  <p class="formula-note"><strong>How to read this:</strong> start with the sender's reputation, then multiply by freshness and volatility. A multiplier of 1 leaves the score unchanged; 0.5 halves it. Admission requires the final score to reach the threshold. Passing the gate lets object reports be considered for fusion; it does not guarantee every report is accepted.</p>
+  {formulas.map(item => (
+    <div data-formula-mode={item.mode} hidden={item.mode !== "freshness"}>
+      <h3>{item.title}</h3>
+      {item.equations.map(equation => <div class="formula-math" set:html={render(equation)} />)}
+      <dl class="formula-variables">{item.variables.map(([symbol, explanation]) => <div><dt>{symbol}</dt><dd>{explanation}</dd></div>)}</dl>
+      <p class="formula-note">{item.note}</p>
+    </div>
+  ))}
+</section>

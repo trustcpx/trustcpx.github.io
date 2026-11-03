@@ -1,0 +1,38 @@
+---
+const rows = [
+  { label: "Honest control", fused: 99.6, gate: 99.9, charge: "0", note: "Genuine reports only" },
+  { label: "Persistent ghosts", fused: 37.3, gate: 47.5, charge: "2,851", note: "Six fabricated vehicles in the receiver's evidence region" },
+  { label: "Hedged ghosts", fused: 41.5, gate: 52.7, charge: "2,232", note: "Fabricated reports carry low confidence" },
+  { label: "Intermittent ghosts", fused: 87, gate: 99.9, charge: "47", note: "Alternating 1 s attack-on / 1 s attack-off" },
+  { label: "300 ms delay", fused: 2.8, gate: 3.3, charge: "0", note: "Freshness reduces admission" },
+  { label: "1 s delay", fused: 0, gate: .1, charge: "0", note: "Freshness reduces admission" },
+  { label: "Ghosts outside evidence", fused: 99.5, gate: 99.9, charge: "0", note: "Limitation: receiver cannot contradict the reports" },
+];
+---
+<div class="attack-comparison">
+  <div class="comparison-heading"><strong>Reports reaching fusion</strong><span>Share of the tested sender's reports</span></div>
+  <div class="attack-bars">
+    {rows.map((row, index) => (
+      <div class:list={["attack-bar-row", index === rows.length - 1 && "is-limitation"]}>
+        <span class="attack-label">{row.label}</span>
+        <div class="attack-track" aria-hidden="true"><span style={`width: ${row.fused}%`}></span></div>
+        <strong>{row.fused.toFixed(1)}%</strong>
+      </div>
+    ))}
+  </div>
+  <p class="chart-reading">The attacked sender reports both genuine and fabricated objects. These percentages measure its total report throughput; they do not measure the fraction of ghosts accepted.</p>
+</div>
+<details class="research-details">
+  <summary>Simulation setup, admission rates, and incorrect evidence</summary>
+  <p>Five agents observe a scene with 23 targets; each sees 8–13 targets through a 50 m sensor with vehicle occlusion. The nominal run is 30 s at 30 Hz. Only Agent 2's reports change across scenarios.</p>
+  <div class="table-scroll"><table>
+    <caption>Agent 2 attack ablations from the paper</caption>
+    <thead><tr><th scope="col">Scenario</th><th scope="col">Fused reports</th><th scope="col">Gate pass</th><th scope="col">Charged I</th></tr></thead>
+    <tbody>{rows.map(row => <tr><th scope="row">{row.label}<small>{row.note}</small></th><td>{row.fused.toFixed(1)}%</td><td>{row.gate.toFixed(1)}%</td><td>{row.charge}</td></tr>)}</tbody>
+  </table></div>
+  <dl class="metric-definitions">
+    <div><dt>Fused reports</dt><dd>Percentage of the sender's individual object reports reaching the final scene.</dd></div>
+    <div><dt>Gate pass</dt><dd>Percentage of frames in which the sender passes admission. Individual objects may still be withheld.</dd></div>
+    <div><dt>Charged I</dt><dd>Accumulated weighted incorrect evidence. It is neither a count of malicious actors nor a rejection percentage.</dd></div>
+  </dl>
+</details>

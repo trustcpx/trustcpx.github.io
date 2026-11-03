@@ -2,6 +2,7 @@
 @plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 @plugin "@tailwindcss/forms";
+@import "./research.css";
 
 @custom-variant dark {
   &:where([data-theme="dark"], [data-theme="dark"] *) {
@@ -52,7 +53,6 @@ main .katex-display {
   margin-inline: auto;
 }
 
-/* Bibliography */
 .csl-entry {
   margin-block: 1.5rem;
   text-indent: -2rem;

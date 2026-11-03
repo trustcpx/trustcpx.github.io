@@ -1,169 +1,189 @@
 ---
-title: "TrustCPX: A Decentralized Trust Framework for Cooperative Perception in Connected Vehicles"
+title: "TrustCPX: A Decentralized Trust Framework for Cooperative Perception in Multi-Agent Systems"
 theme: light
 favicon: favicon.svg
-description: "Anonymous ICRA submission: decentralized trust for robust cooperative perception in connected vehicles."
+description: "From object-level evidence to persistent peer reputation and trust-aware cooperative fusion. Methods, real-data evaluation, attack ablations, and an interactive explorer."
 thumbnail: screenshot-light.png
 ---
 
 import Header from "./components/Header.astro";
 import Video from "./components/Video.astro";
-import HighlightedSection from "./components/HighlightedSection.astro";
-import Figure from "./components/Figure.astro";
 import Picture from "./components/Picture.astro";
-import TwoColumns from "./components/TwoColumns.astro";
-import Wide from "./components/Wide.astro";
-import {Comparison} from "./components/Comparison.tsx";
-
+import TrustPipeline from "./components/TrustPipeline.astro";
+import PaperResults from "./components/PaperResults.astro";
 import headerWallpaper from "./assets/trustcpx-header.jpg";
 import localTrustVideo from "./assets/local_trust_estimation_using_BEVFusion_detections.mp4";
 import groundTruthVideo from "./assets/local_trust_ground_truth.mp4";
-import localTrust from "./assets/slider_v2xreal_dataset_of_ucla_local_trustworthiness_visualization_results.png";
-import groundTruth from "./assets/slider_v2xreal_dataset_of_ucla_visualized_ground_truth.png";
-import bevIntersection from "./assets/visualization_results_BEV_UCLA_Smart_Intersection.png";
 import globalFusion from "./assets/visualization_results_global_fusion.png";
-import globalTrust from "./assets/Visualization_results_of_global_trust_estimation.png";
-import trustworthyPipeline from "./assets/trustworthy_perception_pipeline.png";
+import groundTruth from "./assets/slider_v2xreal_dataset_of_ucla_local_trustworthiness_visualization_results.png";
+import localTrust from "./assets/slider_v2xreal_dataset_of_ucla_visualized_ground_truth.png";
+import { Comparison } from "./components/Comparison.tsx";
 
-<Header
-    title="TrustCPX: A Decentralized Trust Framework for Cooperative Perception in Connected Vehicles"
-    authors={[]}
-    conference="Anonymous submission to ICRA"
-    links={[
-        {name: "Paper", url: "#paper", icon: "ri:file-pdf-2-line"},
-        {name: "Code", url: "#code", icon: "ri:github-line"},
-        {name: "arXiv", url: "#arxiv", icon: "academicons:arxiv"},
-        {name: "Slides", url: "#slides", icon: "ri:slideshow-2-line"},
-        {name: "Poster", url: "#poster", icon: "ri:layout-grid-line"},
-    ]}
->
-    <Picture slot="background" src={headerWallpaper}
-             alt="Autonomous vehicle equipped with a roof-mounted perception sensor" priority/>
+<Header title="TrustCPX" authors={[]} conference="A Decentralized Trust Framework for Cooperative Perception in Multi-Agent Systems"
+  links={[
+    {name: "How it works", url: "#method", icon: "ri:flow-chart"},
+    {name: "Evaluation", url: "#results", icon: "ri:bar-chart-line"},
+    {name: "Explore the gate", url: import.meta.env.BASE_URL + "explore/#overview", icon: "ri:equalizer-line"},
+  ]}>
+  <Picture slot="background" src={headerWallpaper} alt="A sensor-equipped vehicle used for cooperative perception" priority />
 </Header>
 
-<HighlightedSection>
-    ### Abstract
+<nav class="paper-nav" aria-label="Page sections">
+  <a href="#overview">Overview</a><a href="#demonstrations">Visual example</a><a href="#method">Local trust</a><a href="#global-trust">Global trust</a><a href="#results">Results</a><a href="#limitations">Scope</a>
+</nav>
 
-    Cooperative perception (CP) approaches to autonomous driving position themselves as a natural successor to
-    single-vehicle solutions that often suffer from occlusion, a common precursor to collisions and a particular problem
-    at intersections. However, the incorporation of external sensor data (from other vehicles, roadside units) hinges
-    upon trust – if the ego vehicle cannot deduce which data is truthful, timely, and accurate, it leaves itself
-    vulnerable to faulty or adversarial agents. Existing CP approaches largely focus on tackling one or two facets of
-    trust in isolation (such as on-off attacks, Sybil attacks, or data spoofing), and, to our knowledge, no end-to-end
-    pipeline exists to address the full range of threats. We adapt and extend reputation methods from prior work to
-    build such a pipeline and test it on real-world datasets. Each vehicle maintains a local estimate of every peer,
-    updated every iteration based on message freshness, reputation volatility, and accumulated agreement with
-    independently observed evidence. Furthermore, accumulated agreement itself is reputation-weighted, so low-standing
-    senders cannot vouch for one another. The final fusion is gated upon reputation, so only trustworthy objects are
-    passed for downstream tasks such as trajectory planning. Evaluated on real-world data recorded at a smart
-    intersection, the pipeline holds per-frame latency under the 50 ms real-time budget on the target edge device, and
-    has been demonstrated to industry and transportation partners, with live field deployment planned next.
+<section id="overview" class="review-section">
+  <p class="eyebrow">Cooperative perception · object-level sharing</p>
+  <h2>See beyond one viewpoint.<br />Trust the evidence before fusion.</h2>
+  <p class="lead-copy">Sharing detections helps robots overcome occlusions and limited sensing range. But an honest agent can be wrong, a message can be stale, and a malicious sender can fabricate objects. TrustCPX connects <strong>trust in each detection</strong> with <strong>trust in its source over time</strong> to decide which reports influence the shared scene.</p>
+  <p class="contribution-line"><strong>The contribution:</strong> a decentralized two-stage framework that combines 14 local trust factors with persistent peer reputation, then separates evidence-based judging from admission and reputation-weighted output fusion. TrustCPX is also deployed live at an instrumented intersection, fusing detections from infrastructure lidar and vehicle lidar online.</p>
+  <div class="metric-cards">
+    <div class="metric-card"><span>Local score quality · real data</span><strong>0.647 → 0.778</strong><p>mAP: model confidence alone → learned local trust.</p></div>
+    <div class="metric-card"><span>Global filtering · simulation</span><strong>62.7% withheld</strong><p>Of reports from the sender injecting persistent ghosts; genuine and fabricated reports combined.</p></div>
+    <div class="metric-card"><span>Local chain · embedded hardware</span><strong>44.1 ms</strong><p>Median detection + tracking + local trust. Global processing is measured separately.</p></div>
+  </div>
+  <p class="deployment-inline"><span class="live-dot" aria-hidden="true"></span><strong>Deployed live:</strong> infrastructure lidar and vehicle lidar provide detections for online fusion at an instrumented intersection. The benchmark results below are separate from this deployment.</p>
+</section>
 
-</HighlightedSection>
-
-## Overview
-
-Connected vehicles can extend their field of view through cooperative perception, but shared detections are useful only when the receiver can assess their provenance and reliability. TrustCPX is a decentralized, vehicle-local trust layer that evaluates every peer before its objects enter fusion. It is designed for the heterogeneous, delayed, and potentially adversarial messages encountered by real V2X systems [@chen2019cooper; @v2xreal2023].
-
-For each received message, TrustCPX combines freshness, reputation volatility, and agreement with independently observed evidence. Agreement is itself reputation-weighted, limiting collusion by low-standing peers. The resulting local reputation gates fusion, preserving actionable detections while excluding sources that cannot be trusted.
-<Wide>
-    <Figure>
-        <Picture slot="figure" src={trustworthyPipeline}
-                 alt="TrustCPX trustworthy perception pipeline, from received cooperative messages through decentralized trust estimation to trust-gated fusion"/>
-        <Fragment slot="caption">TrustCPX architecture. Each vehicle maintains local peer reputations from message
-            freshness, reputation volatility, and evidence-weighted agreement; these estimates gate cooperative fusion
-            before downstream planning.</Fragment>
-    </Figure>
-</Wide>
-
-## Local Trust Estimation
-
-Hover, drag, or tap the divider to reveal the difference between the TrustCPX local-trust visualization and the annotated ground truth.
-
-<Wide>
-    <Comparison client:idle>
-        <Picture slot="itemOne" src={localTrust}
-                 alt="TrustCPX local trustworthiness visualization at a real intersection"/>
-        <Picture slot="itemTwo" src={groundTruth} alt="Ground-truth visualization of the V2X-Real dataset"/>
+<section id="demonstrations" class="review-section">
+  <p class="eyebrow">01 / Visual intuition</p>
+  <h2>A detection is more than a confidence score.</h2>
+  <p>Drag the divider to compare reference annotations and local trust scores in the same CARLA scene. The example shows what object-level scoring looks like; sender admission is explained next.</p>
+  <figure class="featured-comparison">
+    <div class="comparison-labels" aria-hidden="true"><span>Reference annotations</span><span>Local trust scores</span></div>
+    <Comparison client:visible>
+      <Picture slot="itemOne" src={groundTruth} alt="CARLA scene with reference object annotations" />
+      <Picture slot="itemTwo" src={localTrust} alt="Same CARLA scene with local trust scores" />
     </Comparison>
-</Wide>
+    <figcaption><span class="media-tag">CARLA simulation</span> Each tracked object receives a local trust score between 0 and 1. This illustration is separate from the paper's real-data quantitative evaluation.</figcaption>
+  </figure>
+</section>
 
-<Wide>
-<Figure>
-    <Picture slot="figure" src={bevIntersection}
-             alt="Bird's-eye-view visualization of cooperative perception and global trust estimation"/>
-    <Fragment slot="caption">TrustCPX evaluates received cooperative detections in a challenging intersection scene
-        before they are admitted to the ego vehicle's perception stack.</Fragment>
-</Figure>
-</Wide>
+<section id="method" class="review-section">
+  <p class="eyebrow">02 / Method · local stage</p>
+  <h2>First, assess your own detections.</h2>
+  <p>Each agent detects and tracks objects, checks 14 complementary factors, and combines them into a <span class="term" tabindex="0">local trust score<span class="term-tip">A score from 0 to 1 summarizing how strongly the agent's own perception supports one tracked detection.</span></span>. Only tracked objects and their scores are shared; peers do not need access to the sender's raw sensor data.</p>
+  <div class="factor-groups">
+    <article><span>4 factors</span><h3>Sensor evidence</h3><p>How much of the object was actually observed?</p></article>
+    <article><span>3 factors</span><h3>Geometry</h3><p>Does the box fit the scene and object class?</p></article>
+    <article><span>4 factors</span><h3>Model uncertainty</h3><p>How certain is the model about the detection?</p></article>
+    <article><span>3 factors</span><h3>Time consistency</h3><p>Does the track behave consistently over time?</p></article>
+  </div>
+  <details class="research-details">
+    <summary>Which 14 factors are used, and how are they combined?</summary>
+    <dl class="metric-definitions">
+      <div><dt>Sensor evidence</dt><dd>Point count, point density, object distance, and occlusion.</dd></div>
+      <div><dt>Geometric plausibility</dt><dd>Ground relationship, object overlap, and class-aligned object shape.</dd></div>
+      <div><dt>Model uncertainty</dt><dd>Model confidence, geometric uncertainty, heading uncertainty, and class uncertainty.</dd></div>
+      <div><dt>Temporal consistency</dt><dd>Spatiotemporal consistency, temporal presence, and temporal shape consistency.</dd></div>
+    </dl>
+    <p>The paper compares arithmetic and geometric aggregation, fitted weights, and a small multi-layer perceptron (MLP). All factors remain available individually for inspection. The detector is lidar-only BEVFusion with an added uncertainty head; tracked objects are shared through Sensor Data Sharing Messages (SDSMs).</p>
+  </details>
+</section>
 
-## Trust-aware fusion
-
-The pipeline is lightweight enough to run online: messages are scored at every iteration, peer estimates are updated locally, and fusion is conditioned on reputation. This retains the benefits of multi-agent perception while reducing the effect of stale, inconsistent, or malicious reports. Our evaluation uses real-world cooperative driving data from a smart intersection, represented in the V2X-Real dataset [@v2xreal2023], and BEV detections produced with a multimodal fusion backbone [@liu2022bevfusion].
-
-<Wide>
-<TwoColumns>
-    <div slot="left">
-        <Video src={localTrustVideo} aria-label="Local trust estimation with BEVFusion detections"/>
-        <p class="text-center text-sm">Local trust estimation over BEV detections.</p>
+<section id="global-trust" class="review-section">
+  <p class="eyebrow">03 / Method · global stage</p>
+  <h2>Then, decide whose reports can contribute.</h2>
+  <p>Every receiver keeps its own <span class="term" tabindex="0">peer reputation<span class="term-tip">A persistent score for a sender, updated from evidence observed by this receiver and admitted peers. It is not a single network-wide score.</span></span>. Corroborated reports earn credit; contradicted reports accumulate incorrect evidence. Freshness and volatility affect the admission gate without overwriting stored reputation.</p>
+  <TrustPipeline />
+  <div class="threat-overview">
+    <h3>Different failure modes, different safeguards.</h3>
+    <ul class="threat-paths">
+      <li><strong>Fabricated objects</strong><span aria-hidden="true">→</span><span>Visible contradiction</span><span aria-hidden="true">→</span><span>Withhold reports and charge incorrect evidence</span></li>
+      <li><strong>Stale messages</strong><span aria-hidden="true">→</span><span>Blind travel distance grows</span><span aria-hidden="true">→</span><span>Freshness lowers the admission score</span></li>
+      <li><strong>Repeated drops</strong><span aria-hidden="true">→</span><span>Volatility retains drop history</span><span aria-hidden="true">→</span><span>Admission remains more cautious after rebounds</span></li>
+      <li><strong>Newcomer collusion</strong><span aria-hidden="true">→</span><span>Only admitted peers can corroborate</span><span aria-hidden="true">→</span><span>Gated newcomers cannot vouch for each other</span></li>
+    </ul>
+  </div>
+  <div class="metric-cards global-metrics">
+    <div class="metric-card"><span>Honest control · reports fused</span><strong>99.6%</strong><p>Honest reports retained despite partial viewpoints.</p></div>
+    <div class="metric-card"><span>Persistent-ghost sender · reports fused</span><strong>37.3%</strong><p>62.7% withheld; the sender fails admission in 52.5% of frames.</p></div>
+  </div>
+  <p class="chart-reading">Five-agent simulation. Percentages describe all reports from the tested sender, including genuine detections. They are not malicious-actor detection rates or ghost-only rejection rates.</p>
+  <details class="research-details">
+    <summary>Why a missing corroboration does not automatically mean “false”</summary>
+    <p>A peer may see an object that ego cannot. Unverified reports are held without a charge; a contradiction requires contemporaneous visibility evidence. Below reputation 0.95, an admitted sender's reports require corroboration. At or above 0.95, the broader admission tier still withholds reports currently contradicted or charged by the ledger.</p>
+    <p>Held-only frames leave reputation unchanged. Corroboration can settle a held report later. The update affects the next frame; admission never blocks future judging.</p>
+  </details>
+  <a class="explore-link" href={import.meta.env.BASE_URL + "explore/#global-trust"}><span>Interactive explanation</span> Change freshness, volatility, and absence parameters <span aria-hidden="true">→</span></a>
+  <figure class="fusion-example">
+    <Picture src={globalFusion} alt="Recorded real-data point-cloud scene with objects and scores after cooperative fusion" />
+    <figcaption><span class="media-tag">Recorded real data</span> Fused scene visualization. An object's local score and its sender's reputation are distinct inputs to fusion; this figure is not an attack-ablation trace.</figcaption>
+  </figure>
+  <details class="research-details">
+    <summary>Watch the real-data local-trust recordings</summary>
+    <div class="demo-grid">
+      <div><Video src={localTrustVideo} autoplay={false} preload="metadata" aria-label="Local trust scores on recorded real-data detections" /><p>Local trust over tracked detections.</p></div>
+      <div><Video src={groundTruthVideo} autoplay={false} preload="metadata" aria-label="Second recorded real-data sequence with local trust scores" /><p>A second recording with local trust scores.</p></div>
     </div>
-    <div slot="right">
-        <Video src={groundTruthVideo} aria-label="Ground-truth cooperative perception sequence"/>
-        <p class="text-center text-sm">Corresponding ground-truth sequence.</p>
-    </div>
-</TwoColumns>
-</Wide>
+    <p>These recordings have independent playback controls and are not synchronized ground-truth comparisons.</p>
+  </details>
+</section>
 
-<Figure>
-    <Picture slot="figure" src={globalFusion} alt="Trust-aware global fusion results across connected vehicles"/>
-    <Fragment slot="caption">Trust-gated global fusion: only detections from sufficiently reputable peers contribute to
-        the final cooperative scene representation.</Fragment>
-</Figure>
+<section id="results" class="review-section">
+  <p class="eyebrow">04 / Evaluation</p>
+  <h2>Three questions. Three kinds of evidence.</h2>
+  <article class="result-study">
+    <span class="study-label">1 / Score quality · real-world validation</span>
+    <h3>Do combined factors rank detections better?</h3>
+    <p>The learned local trust function reaches <strong>0.778 mAP</strong>, versus <strong>0.647</strong> for model confidence alone. The arithmetic mean reaches <strong>0.782 AUROC</strong>, exceeding every individual factor. Removing any of the four factor groups lowers AUROC and AP.</p>
+    <p class="study-context"><a href="https://github.com/AIR-THU/DAIR-V2X-Seq/tree/main/dataset/v2x-seq-spd">V2X-Seq-SPD</a> + <a href="https://mobility-lab.seas.ucla.edu/v2x-real/">V2X-Real</a> · vehicle and roadside agents · 175,526 detections · 5,415 tracks</p>
+    <details class="research-details">
+      <summary>Trust functions, metric definitions, and uncertainty</summary>
 
-<Figure>
-    <Picture slot="figure" src={globalTrust} alt="Global trust estimation results for connected perception agents"/>
-    <Fragment slot="caption">Global trust estimation aggregates evidence without allowing low-reputation agents to
-        reinforce one another.</Fragment>
-</Figure>
+      | Trust function | Fitted | mAP ↑ |
+      | :--- | :---: | ---: |
+      | Model confidence only | — | 0.647 |
+      | Arithmetic mean | No | 0.708 |
+      | Weighted average | Yes | 0.707 |
+      | Geometric mean | No | 0.713 |
+      | Weighted geometric mean | Yes | 0.718 |
+      | MLP | Yes | **0.778** |
 
-## Experimental results
+      <p><strong>mAP</strong> is the mean of average precision per predicted class for ranking correct detections; it is not an accuracy percentage. <strong>AUROC</strong> measures separation between correct and incorrect detections across score thresholds. A detection is correct when one-to-one matching gives bird's-eye-view intersection-over-union ≥ 0.3, regardless of class.</p>
+      <p>Fitted components use the official training splits; results use official validation splits. The MLP uses two hidden layers of eight tanh units. Across five seeds, its mAP is 0.772 [0.690, 0.821]; the paper reports a gain over model confidence of 0.125 [0.076, 0.175]. Intervals are 95% track-bootstrap intervals.</p>
+    </details>
+  </article>
+  <article class="result-study">
+    <span class="study-label">2 / Robustness · controlled simulation</span>
+    <h3>Which reports survive an attack?</h3>
+    <p>Persistent and hedged ghosts reduce the attacked sender's overall fusion rate. Freshness sharply reduces admission for delayed messages. Unobservable ghosts and intermittent attacks remain harder cases.</p>
+    <PaperResults />
+    <p class="study-context">Complementary real-data replay: the honest peer passes admission in 97.2% of frames across six V2X-Seq-SPD sequences; 4.7% of its reports are withheld.</p>
+  </article>
+  <article class="result-study">
+    <span class="study-label">3 / Runtime · desktop and embedded hardware</span>
+    <h3>What is the processing cost?</h3>
+    <p>The local chain has a median latency of <strong>18.0 ms</strong> on the workstation and <strong>44.1 ms</strong> on Jetson AGX Thor. The global stage is timed separately: with five agents it takes <strong>8.9 ms</strong> and <strong>16.4 ms</strong>, respectively.</p>
+    <details class="research-details">
+      <summary>Median, tail latency, and scaling</summary>
 
-The following table is reserved for the camera-ready quantitative comparison. It is intentionally kept as a clearly labeled placeholder while final baselines and attack configurations are being consolidated.
+      | Stage | Workstation p50 | Jetson AGX Thor p50 |
+      | :--- | ---: | ---: |
+      | Detection + tracking + local trust | 18.0 ms | 44.1 ms |
+      | Global stage, 2 agents | 5.4 ms | 10.0 ms |
+      | Global stage, 5 agents | 8.9 ms | 16.4 ms |
+      | Global stage, 10 agents | 15.6 ms | 29.9 ms |
+      | Global stage, 20 agents | 33.3 ms | 66.2 ms |
 
-| Method | Cooperative detection | Attack robustness | Latency (ms/frame) |
-| :--- | :---: | :---: | :---: |
-| Single-vehicle perception | TBD | TBD | TBD |
-| Cooperative fusion baseline | TBD | TBD | TBD |
-| **TrustCPX (ours)** | TBD | TBD | **< 50** |
+      <p><strong>p50</strong> is the median: half of completed frames finish faster and half slower. Local-chain p95 is 30.8 ms on the workstation and 73.4 ms on Thor. Thor completes 95.2% of replayed validation frames; the workstation completes all of them. This is not an end-to-end 50 ms guarantee.</p>
+      <p>The workstation uses an AMD Ryzen 9 9900X and NVIDIA RTX 5090. Local timing includes DDS transport at 10 Hz recording speed; global benchmarks use synthetic scenes with known associations, 32 objects per agent, and a 20 Hz flush rate.</p>
+    </details>
+  </article>
+</section>
 
-## Resources
+<section id="limitations" class="review-section">
+  <p class="eyebrow">05 / Scope</p>
+  <h2>Evidence has limits. So does trust.</h2>
+  <div class="scope-grid">
+    <div><h3>What remains difficult</h3><p>Ghosts outside ego's evidence have 99.5% overall sender-report fusion in simulation. Intermittent attacks retain 87.0%. Absence of corroboration cannot establish a contradiction. Learned local scores also transfer imperfectly between vehicle and roadside agents.</p></div>
+    <div><h3>What the system assumes</h3><p>Authenticated identities, trustworthy timestamps, correct ego localization, and stable track identities. Secure identity continuity, stronger unseen-report verdicts, and improved calibration remain future work.</p></div>
+  </div>
+</section>
 
-Anonymous double-blind review materials will be linked here when permitted.
-
-| Resource | Status |
-| :--- | :--- |
-| <span id="paper">Paper</span> | Placeholder for anonymous manuscript |
-| <span id="code">Code</span> | Placeholder for anonymous repository |
-| <span id="arxiv">arXiv</span> | Placeholder pending public release |
-| <span id="slides">Slides</span> | Placeholder for presentation deck |
-| <span id="poster">Poster</span> | Placeholder for conference poster |
-
-## References
-
-TrustCPX builds on cooperative perception, real-world V2X benchmarks, and reputation reasoning for distributed systems [@chen2019cooper; @v2xreal2023; @josang2007survey].
-
-## BibTeX
-
-```bibtex
-@inproceedings{trustcpx2026,
-  title     = {TrustCPX: A Decentralized Trust Framework for Cooperative Perception in Connected Vehicles},
-  author    = {Anonymous},
-  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
-  year      = {2026},
-  note      = {Under double-blind review}
-}
-```
-
-## Bibliography
-
-[^ref]
+<section id="resources" class="review-section resources-section">
+  <p class="eyebrow">Materials</p>
+  <h2>Explore the method in more detail.</h2>
+  <p>This page supplements the anonymous manuscript. Public manuscript and code links are pending release.</p>
+  <a class="explore-link" href={import.meta.env.BASE_URL + "explore/#resources"}>Open the global-trust explorer <span aria-hidden="true">→</span></a>
+</section>

@@ -1,0 +1,32 @@
+---
+import { Font } from "astro:assets";
+import GlobalTrustPlayground from "../components/GlobalTrustPlayground.astro";
+import "../styles/global.css";
+---
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Explore how reputation, message freshness, and absence affect global trust admission." />
+    <title>Global trust explorer · TrustCPX</title>
+    <Font cssVariable="--font-noto-sans" preload={[{ subset: "latin", style: "normal" }]} />
+  </head>
+  <body class="explorer-page">
+    <header class="explorer-header">
+      <a data-return-link href={import.meta.env.BASE_URL + "#method"}>← Back to the method</a>
+      <h1>Explore the admission gate</h1>
+      <p>Change a sender's conditions and watch its effective reputation move relative to the admission threshold. Admission lets reports be considered for fusion; individual reports still need to satisfy the verdict rules.</p>
+    </header>
+    <GlobalTrustPlayground />
+    <script>
+      const destinations: Record<string, string> = { overview: "overview", method: "method", "global-trust": "global trust", resources: "resources" };
+      const section = window.location.hash.slice(1);
+      const link = document.querySelector<HTMLAnchorElement>("[data-return-link]");
+      if (link && destinations[section]) {
+        link.hash = section;
+        link.textContent = "← Back to " + destinations[section];
+      }
+    </script>
+  </body>
+</html>

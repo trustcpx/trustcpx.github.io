@@ -1,0 +1,14 @@
+<div class="trust-pipeline" aria-label="Reports are judged independently of admission; reputation is updated for the next frame">
+  <div class="pipeline-heading"><span>Receiver-local processing</span><span>No central trust authority</span></div>
+  <ol class="pipeline-stages">
+    <li><span class="stage-index">01</span><strong>Receive objects</strong><p>Tracked detections arrive with local trust scores.</p></li>
+    <li><span class="stage-index">02</span><strong>Judge evidence</strong><p>Compare reports with ego observations and admitted peers.</p></li>
+    <li><span class="stage-index">03</span><strong>Apply the gate</strong><p>Stored reputation × freshness × volatility ≥ 0.6?</p></li>
+    <li><span class="stage-index">04</span><strong>Fuse admitted reports</strong><p>Weight by local score, geometric consensus, and sender reputation.</p></li>
+  </ol>
+  <div class="pipeline-branches">
+    <div><strong>Evidence → next-frame reputation</strong><p>Supported reports earn credit; contradicted reports are charged; unverified reports remain held.</p></div>
+    <div><strong>Gate fails → output withheld</strong><p>Judging continues even for a rejected sender, allowing its reputation to change with new evidence.</p></div>
+  </div>
+  <p class="pipeline-caption">The current frame uses the previously stored reputation. A new reputation affects the next frame.</p>
+</div>
