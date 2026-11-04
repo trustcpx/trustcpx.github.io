@@ -11,6 +11,7 @@ import Video from "./components/Video.astro";
 import Picture from "./components/Picture.astro";
 import TrustPipeline from "./components/TrustPipeline.astro";
 import PaperResults from "./components/PaperResults.astro";
+import LocalTrustFactors from "./components/LocalTrustFactors.astro";
 import headerWallpaper from "./assets/trustcpx-header.jpg";
 import localTrustVideo from "./assets/local_trust_estimation_using_BEVFusion_detections.mp4";
 import groundTruthVideo from "./assets/local_trust_ground_truth.mp4";
@@ -48,14 +49,14 @@ import { Comparison } from "./components/Comparison.tsx";
 <section id="demonstrations" class="review-section">
   <p class="eyebrow">01 / Visual intuition</p>
   <h2>A detection is more than a confidence score.</h2>
-  <p>Drag the divider to compare reference annotations and local trust scores in the same CARLA scene. The example shows what object-level scoring looks like; sender admission is explained next.</p>
+  <p>Drag the divider to compare reference annotations and local trust scores in the same real-world intersection scene. The example shows object-level scoring; sender admission is explained next.</p>
   <figure class="featured-comparison">
     <div class="comparison-labels" aria-hidden="true"><span>Reference annotations</span><span>Local trust scores</span></div>
     <Comparison client:visible>
-      <Picture slot="itemOne" src={groundTruth} alt="CARLA scene with reference object annotations" />
-      <Picture slot="itemTwo" src={localTrust} alt="Same CARLA scene with local trust scores" />
+      <Picture slot="itemOne" src={groundTruth} alt="Real-world intersection scene with reference object annotations" />
+      <Picture slot="itemTwo" src={localTrust} alt="Same real-world intersection scene with local trust scores" />
     </Comparison>
-    <figcaption><span class="media-tag">CARLA simulation</span> Each tracked object receives a local trust score between 0 and 1. This illustration is separate from the paper's real-data quantitative evaluation.</figcaption>
+    <figcaption><span class="media-tag">Real-world data</span> Reference annotations (left) and local trust scores from 0 to 1 (right) for the same intersection scene.</figcaption>
   </figure>
 </section>
 
@@ -63,22 +64,7 @@ import { Comparison } from "./components/Comparison.tsx";
   <p class="eyebrow">02 / Method · local stage</p>
   <h2>First, assess your own detections.</h2>
   <p>Each agent detects and tracks objects, checks 14 complementary factors, and combines them into a <span class="term" tabindex="0">local trust score<span class="term-tip">A score from 0 to 1 summarizing how strongly the agent's own perception supports one tracked detection.</span></span>. Only tracked objects and their scores are shared; peers do not need access to the sender's raw sensor data.</p>
-  <div class="factor-groups">
-    <article><span>4 factors</span><h3>Sensor evidence</h3><p>How much of the object was actually observed?</p></article>
-    <article><span>3 factors</span><h3>Geometry</h3><p>Does the box fit the scene and object class?</p></article>
-    <article><span>4 factors</span><h3>Model uncertainty</h3><p>How certain is the model about the detection?</p></article>
-    <article><span>3 factors</span><h3>Time consistency</h3><p>Does the track behave consistently over time?</p></article>
-  </div>
-  <details class="research-details">
-    <summary>Which 14 factors are used, and how are they combined?</summary>
-    <dl class="metric-definitions">
-      <div><dt>Sensor evidence</dt><dd>Point count, point density, object distance, and occlusion.</dd></div>
-      <div><dt>Geometric plausibility</dt><dd>Ground relationship, object overlap, and class-aligned object shape.</dd></div>
-      <div><dt>Model uncertainty</dt><dd>Model confidence, geometric uncertainty, heading uncertainty, and class uncertainty.</dd></div>
-      <div><dt>Temporal consistency</dt><dd>Spatiotemporal consistency, temporal presence, and temporal shape consistency.</dd></div>
-    </dl>
-    <p>The paper compares arithmetic and geometric aggregation, fitted weights, and a small multi-layer perceptron (MLP). All factors remain available individually for inspection. The detector is lidar-only BEVFusion with an added uncertainty head; tracked objects are shared through Sensor Data Sharing Messages (SDSMs).</p>
-  </details>
+  <LocalTrustFactors />
 </section>
 
 <section id="global-trust" class="review-section">

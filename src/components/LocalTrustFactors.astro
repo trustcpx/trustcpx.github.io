@@ -1,0 +1,87 @@
+---
+import { Icon } from "astro-icon/components";
+
+const groups = [
+  {
+    name: "Sensor evidence", shortName: "Sensor evidence", icon: "ri:radar-line",
+    question: "How much of the object was actually observed?",
+    factors: [
+      ["Point count", "More lidar returns provide stronger measurement evidence."],
+      ["Point density", "Interprets point count relative to the object's volume."],
+      ["Object distance", "Accounts for weaker sensor evidence at longer range."],
+      ["Occlusion", "Checks how much of the object's geometry is blocked."],
+    ],
+  },
+  {
+    name: "Geometric plausibility", shortName: "Geometry", icon: "ri:box-3-line",
+    question: "Does the box fit the scene and object class?",
+    factors: [
+      ["Ground relationship", "Checks whether the object rests near the local ground surface."],
+      ["Object overlap", "Penalizes implausible overlap between solid tracked objects."],
+      ["Class-aligned object shape", "Checks whether dimensions are plausible for the predicted class."],
+    ],
+  },
+  {
+    name: "Model uncertainty", shortName: "Model uncertainty", icon: "ri:brain-line",
+    question: "How certain is the model about the detection?",
+    factors: [
+      ["Model confidence", "Uses the model's assessment of the object's existence."],
+      ["Geometric uncertainty", "Measures uncertainty in box position and dimensions."],
+      ["Heading uncertainty", "Measures uncertainty in the object's orientation."],
+      ["Class uncertainty", "Checks whether the leading class predictions are ambiguous."],
+    ],
+  },
+  {
+    name: "Temporal consistency", shortName: "Time consistency", icon: "ri:history-line",
+    question: "Does the track behave consistently over time?",
+    factors: [
+      ["Spatiotemporal consistency", "Checks motion against the previous velocity estimate."],
+      ["Temporal presence", "Gives more support to tracks observed across consecutive frames."],
+      ["Temporal shape consistency", "Checks whether a rigid object's dimensions remain stable."],
+    ],
+  },
+];
+---
+<div class="factor-groups">
+  {groups.map(group => (
+    <article>
+      <div class="factor-overview-top"><Icon name={group.icon} aria-hidden="true" /><span>{group.factors.length} factors</span></div>
+      <h3>{group.shortName}</h3>
+      <p>{group.question}</p>
+    </article>
+  ))}
+</div>
+<details class="research-details factor-details">
+  <summary>
+    <span class="factor-summary-icon"><Icon name="ri:git-merge-line" aria-hidden="true" /></span>
+    <span>Which 14 factors are used, and how are they combined?<small>Inspect the evidence behind each local trust score.</small></span>
+    <Icon name="ri:arrow-down-s-line" class="factor-chevron" aria-hidden="true" />
+  </summary>
+  <div class="factor-details-body">
+    <div class="factor-panel-heading"><span class="eyebrow">Four complementary sources of evidence</span><span>14 factors → 1 local score</span></div>
+    <div class="factor-card-grid">
+      {groups.map((group, index) => (
+        <article class="factor-card" style={`--factor-delay: ${index * 60}ms`}>
+          <header class="factor-card-heading">
+            <span class="factor-card-icon"><Icon name={group.icon} aria-hidden="true" /></span>
+            <h4>{group.name}</h4><span class="factor-count">{group.factors.length} factors</span>
+          </header>
+          <ul class="factor-list">
+            {group.factors.map(([name, meaning]) => (
+              <li><strong>{name}</strong><span>{meaning}</span></li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+    <ol class="factor-score-flow" aria-label="Local factors are combined into a score and shared with the tracked object">
+      <li><Icon name="ri:radar-line" aria-hidden="true" /><div><strong>Evaluate</strong><span>Map each evidence source to a factor in [0, 1].</span></div></li>
+      <li><Icon name="ri:git-merge-line" aria-hidden="true" /><div><strong>Combine</strong><span>Analytical aggregation or a learned MLP.</span></div></li>
+      <li><Icon name="ri:share-forward-line" aria-hidden="true" /><div><strong>Share</strong><span>Tracked object + local trust score in an SDSM.</span></div></li>
+    </ol>
+    <div class="factor-implementation">
+      <p><strong>Aggregation:</strong> the paper compares arithmetic and geometric means, fitted weights, and a small multi-layer perceptron (MLP).</p>
+      <p><strong>Perception stack:</strong> lidar-only BEVFusion with an added uncertainty head, followed by object tracking. An SDSM (Sensor Data Sharing Message) carries the tracked objects and their local trust scores.</p>
+    </div>
+  </div>
+</details>
