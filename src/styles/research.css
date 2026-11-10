@@ -12,6 +12,10 @@ main a:focus-visible, summary:focus-visible, button:focus-visible, input:focus-v
 .review-section h2 { margin: .35rem 0 1rem; font-size: clamp(1.8rem, 3.5vw, 2.5rem); line-height: 1.18; letter-spacing: -.025em; }
 .review-section h3 { font-size: 1.2rem; line-height: 1.35; margin: 1.5rem 0 .7rem; }
 .lead-copy { font-size: 1.15rem; line-height: 1.8; }
+.architecture-figure { max-width: 80rem; margin: 1.75rem auto 2rem; }
+.architecture-figure > a { display: block; }
+.architecture-figure img { width: 100%; height: auto; max-height: none; margin: 0; }
+.architecture-figure figcaption { max-width: 76ch; margin-inline: auto; }
 .contribution-line { padding-left: 1rem; border-left: 2px solid var(--primary); }
 .metric-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; margin: 1.75rem 0 1rem; }
 .metric-card { padding: 1rem 0; border-top: 2px solid var(--border); }

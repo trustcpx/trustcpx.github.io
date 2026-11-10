@@ -9,10 +9,12 @@ thumbnail: screenshot-light.png
 import Header from "./components/Header.astro";
 import Video from "./components/Video.astro";
 import Picture from "./components/Picture.astro";
+import Wide from "./components/Wide.astro";
 import TrustPipeline from "./components/TrustPipeline.astro";
 import PaperResults from "./components/PaperResults.astro";
 import LocalTrustFactors from "./components/LocalTrustFactors.astro";
 import headerWallpaper from "./assets/trustcpx-header.jpg";
+import trustworthyPipeline from "./assets/trustworthy_perception_pipeline.png";
 import localTrustVideo from "./assets/local_trust_estimation_using_BEVFusion_detections.mp4";
 import groundTruthVideo from "./assets/local_trust_ground_truth.mp4";
 import globalFusion from "./assets/visualization_results_global_fusion.png";
@@ -37,6 +39,14 @@ import { Comparison } from "./components/Comparison.tsx";
   <p class="eyebrow">Cooperative perception · object-level sharing</p>
   <h2>See beyond one viewpoint.<br />Trust the evidence before fusion.</h2>
   <p class="lead-copy">Sharing detections helps robots overcome occlusions and limited sensing range. But an honest agent can be wrong, a message can be stale, and a malicious sender can fabricate objects. TrustCPX connects <strong>trust in each detection</strong> with <strong>trust in its source over time</strong> to decide which reports influence the shared scene.</p>
+  <Wide>
+    <figure class="architecture-figure">
+      <a href={trustworthyPipeline.src} target="_blank" rel="noopener noreferrer" aria-label="View the TrustCPX architecture diagram at full size (opens in a new tab)">
+        <Picture src={trustworthyPipeline} alt="TrustCPX architecture: local trust estimation from sensor, model, and temporal evidence; sharing detections and trust scores over V2X; global trust assessment and peer reputation updates; and trust-aware cooperative fusion" priority />
+      </a>
+      <figcaption><span class="media-tag">TrustCPX architecture</span> From local detection scores to shared reports, persistent peer reputation, and trust-aware fusion. <a href={trustworthyPipeline.src} target="_blank" rel="noopener noreferrer" aria-label="View full-size diagram (opens in a new tab)">View full-size diagram</a>.</figcaption>
+    </figure>
+  </Wide>
   <p class="contribution-line"><strong>The contribution:</strong> a decentralized two-stage framework that combines 14 local trust factors with persistent peer reputation, then separates evidence-based judging from admission and reputation-weighted output fusion. TrustCPX is also deployed live at an instrumented intersection, fusing detections from infrastructure lidar and vehicle lidar online.</p>
   <div class="metric-cards">
     <div class="metric-card"><span>Local score quality · real data</span><strong>0.647 → 0.778</strong><p>mAP: model confidence alone → learned local trust.</p></div>
