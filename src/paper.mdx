@@ -106,14 +106,14 @@ import { Comparison } from "./components/Comparison.tsx";
     <Picture src={globalFusion} alt="Recorded real-data point-cloud scene with objects and scores after cooperative fusion" />
     <figcaption><span class="media-tag">Recorded real data</span> Fused scene visualization. An object's local score and its sender's reputation are distinct inputs to fusion; this figure is not an attack-ablation trace.</figcaption>
   </figure>
-  <details class="research-details">
-    <summary>Watch the real-data local-trust recordings</summary>
+  <section aria-labelledby="recordings-heading">
+    <h3 id="recordings-heading">Real-data local-trust recordings</h3>
     <div class="demo-grid">
-      <div><Video src={localTrustVideo} autoplay={false} preload="metadata" aria-label="Local trust scores on recorded real-data detections" /><p>Local trust over tracked detections.</p></div>
-      <div><Video src={groundTruthVideo} autoplay={false} preload="metadata" aria-label="Second recorded real-data sequence with local trust scores" /><p>A second recording with local trust scores.</p></div>
+      <div><Video src={localTrustVideo} autoplay muted playsinline loop preload="auto" aria-label="Local trust scores on recorded real-data detections" /><p>Local trust over tracked detections.</p></div>
+      <div><Video src={groundTruthVideo} autoplay muted playsinline loop preload="auto" aria-label="Second recorded real-data sequence with local trust scores" /><p>A second recording with local trust scores.</p></div>
     </div>
-    <p>These recordings have independent playback controls and are not synchronized ground-truth comparisons.</p>
-  </details>
+    <p class="chart-reading recordings-note">These recordings have independent playback controls and are not synchronized ground-truth comparisons.</p>
+  </section>
 </section>
 
 <section id="results" class="review-section">
