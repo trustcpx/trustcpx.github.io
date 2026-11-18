@@ -13,10 +13,11 @@ import Wide from "./components/Wide.astro";
 import TrustPipeline from "./components/TrustPipeline.astro";
 import PaperResults from "./components/PaperResults.astro";
 import LocalTrustFactors from "./components/LocalTrustFactors.astro";
-import headerWallpaper from "./assets/trustcpx-header.jpg";
+import headerWallpaper from "./assets/dataset_img_3.jpg";
 import trustworthyPipeline from "./assets/trustworthy_perception_pipeline.png";
 import localTrustVideo from "./assets/local_trust_estimation_using_BEVFusion_detections.mp4";
 import groundTruthVideo from "./assets/local_trust_ground_truth.mp4";
+import globalTrustVideo from "./assets/global_trust_fused.mp4";
 import globalFusion from "./assets/visualization_results_global_fusion.png";
 import groundTruth from "./assets/slider_v2xreal_dataset_of_ucla_local_trustworthiness_visualization_results.png";
 import localTrust from "./assets/slider_v2xreal_dataset_of_ucla_visualized_ground_truth.png";
@@ -28,7 +29,9 @@ import { Comparison } from "./components/Comparison.tsx";
     {name: "Evaluation", url: "#results", icon: "ri:bar-chart-line"},
     {name: "Explore the gate", url: import.meta.env.BASE_URL + "explore/#overview", icon: "ri:equalizer-line"},
   ]}>
-  <Picture slot="background" src={headerWallpaper} alt="A sensor-equipped vehicle used for cooperative perception" priority />
+  <div slot="background" class="absolute inset-0 origin-[56%_20%] scale-[2.2]">
+    <Picture src={headerWallpaper} alt="Lidar point cloud of an intersection with detected people and vehicles" priority />
+  </div>
 </Header>
 
 <nav class="paper-nav" aria-label="Page sections">
@@ -113,6 +116,13 @@ import { Comparison } from "./components/Comparison.tsx";
       <div><Video src={groundTruthVideo} autoplay muted playsinline loop preload="auto" aria-label="Second recorded real-data sequence with local trust scores" /><p>A second recording with local trust scores.</p></div>
     </div>
     <p class="chart-reading recordings-note">These recordings have independent playback controls and are not synchronized ground-truth comparisons.</p>
+  </section>
+  <section aria-labelledby="global-recording-heading">
+    <h3 id="global-recording-heading">Real-data global-trust recording</h3>
+    <figure>
+      <Video src={globalTrustVideo} autoplay muted playsinline loop preload="auto" aria-label="Global trust scores on fused detections in a recorded real-data scene" />
+      <figcaption><span class="media-tag">Global trust scores</span> Fused detections with global trust scores after cooperative perception.</figcaption>
+    </figure>
   </section>
 </section>
 
